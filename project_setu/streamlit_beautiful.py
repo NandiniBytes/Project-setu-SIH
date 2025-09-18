@@ -111,12 +111,28 @@ class ProjectSetuApp:
     """Beautiful Project Setu Application"""
     
     def __init__(self):
-        self.api_base = "http://localhost:8000/api"
+        # Support both local and ngrok URLs
+        self.api_base = st.secrets.get("BACKEND_URL", "http://localhost:8000") + "/api"
+        # For demo/cloud deployment, check if we have a backend URL configured
+        if hasattr(st, 'secrets') and "BACKEND_URL" in st.secrets:
+            self.api_base = st.secrets["BACKEND_URL"] + "/api"
+        else:
+            self.api_base = "http://localhost:8000/api"
     
     def show_landing_page(self):
         """Beautiful landing page"""
-        # Hero section
-        st.markdown("""
+        # Hero section with demo banner if deployed
+        demo_banner = ""
+        if "ngrok" in self.api_base or "streamlit.app" in st._get_option('browser.serverAddress', ''):
+            demo_banner = """
+            <div style="background: linear-gradient(45deg, #667eea 0%, #764ba2 100%); color: white; padding: 1rem; border-radius: 10px; text-align: center; margin-bottom: 1rem;">
+                <h3>🎯 Live Demo - Smart India Hackathon 2025</h3>
+                <p><strong>Problem Statement 25026</strong> | Revolutionary Healthcare Terminology Integration</p>
+            </div>
+            """
+        
+        st.markdown(f"""
+        {demo_banner}
         <div class="hero-section">
             <h1 style="font-size: 4rem; margin: 0;">🏥 Project Setu</h1>
             <h2 style="font-size: 2rem; margin: 1rem 0;">Bridging Millennia of Wisdom with Modern Medicine</h2>
@@ -396,6 +412,16 @@ class ProjectSetuApp:
             **ABHA:** {user.get('abha_id', 'N/A')}
             **Specialty:** {user.get('specialty', 'N/A')}
             """)
+            
+            # Show backend connection status
+            backend_status = "🟢 Local" if "localhost" in self.api_base else "🌐 Cloud"
+            st.caption(f"Backend: {backend_status}")
+            
+            # Demo info for presentations
+            if "ngrok" in self.api_base:
+                st.info("🎯 **Live Demo Mode**\nBackend via ngrok tunnel")
+                st.code(f"API: {self.api_base.replace('/api', '')}")
+                st.caption("Perfect for presentations!")
             
             if st.button("🚪 Logout", use_container_width=True):
                 st.session_state.authenticated = False
