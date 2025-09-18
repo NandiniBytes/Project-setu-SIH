@@ -123,7 +123,14 @@ class ProjectSetuApp:
         """Beautiful landing page"""
         # Hero section with demo banner if deployed
         demo_banner = ""
-        if "ngrok" in self.api_base or "streamlit.app" in st._get_option('browser.serverAddress', ''):
+        # Check if we're in cloud deployment mode
+        is_cloud_deployed = (
+            "ngrok" in self.api_base or 
+            hasattr(st, 'secrets') and "BACKEND_URL" in st.secrets or
+            "localhost" not in self.api_base
+        )
+        
+        if is_cloud_deployed:
             demo_banner = """
             <div style="background: linear-gradient(45deg, #667eea 0%, #764ba2 100%); color: white; padding: 1rem; border-radius: 10px; text-align: center; margin-bottom: 1rem;">
                 <h3>🎯 Live Demo - Smart India Hackathon 2025</h3>
