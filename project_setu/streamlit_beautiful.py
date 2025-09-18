@@ -464,6 +464,32 @@ class ProjectSetuApp:
             st.metric("Searches Today", "1,247")
             st.metric("Active Users", "42")
             
+            # Backend URL configuration for ngrok integration
+            st.markdown("---")
+            st.markdown("### 🔧 Backend Config")
+            
+            current_backend = getattr(self, 'api_base', 'http://localhost:8000/api').replace('/api', '')
+            new_backend = st.text_input(
+                "Ngrok URL:", 
+                value=current_backend,
+                placeholder="https://abc123.ngrok.io",
+                help="Paste your ngrok URL here for live backend"
+            )
+            
+            if st.button("🔄 Update", use_container_width=True) and new_backend != current_backend:
+                # Update the API base URL
+                self.api_base = new_backend + "/api"
+                st.success(f"✅ Backend updated!")
+                st.info("🔄 Refresh page to apply")
+            
+            # Show current backend status
+            if "ngrok" in current_backend:
+                st.success("🌐 Using ngrok tunnel")
+            elif "localhost" in current_backend:
+                st.info("🏠 Using local backend")
+            else:
+                st.warning("🌍 Custom backend")
+            
             return page
     
     def show_smart_search_page(self):
